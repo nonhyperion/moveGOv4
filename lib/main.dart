@@ -1,3 +1,7 @@
+import 'dart:convert';
+import 'dart:io';
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:move_go_v4/StepScreen.dart';
 
@@ -13,7 +17,20 @@ class StartScreen extends StatefulWidget {
 }
 
 class _StartScreenState extends State<StartScreen> {
-  var open = -1;
+  var _open = -1;
+
+  int get open {
+    return _open;
+  }
+
+  set open(int val) {
+    if (val == _open) {
+      _open = -1;
+    } else {
+      _open = val;
+    }
+  }
+
   var gender = 1;
   var year = 2026;
   var weight = 55;
@@ -33,7 +50,16 @@ class _StartScreenState extends State<StartScreen> {
     );
     weightController = FixedExtentScrollController(initialItem: 55);
     heightController = FixedExtentScrollController(initialItem: 170);
+    to();
     super.initState();
+  }
+
+  Future<void> to() async {
+    if (await File("data/data/com.example.move_go_v4/files/setting").exists()) {
+      Navigator.of(context)
+        ..pop()
+        ..push(MaterialPageRoute(builder: (context) => StepScreen()));
+    }
   }
 
   @override
@@ -83,47 +109,52 @@ class _StartScreenState extends State<StartScreen> {
                                     Row(
                                       children: [
                                         Text(gender == 0 ? "女" : "男"),
-                                        Icon(
-                                          open == 1
-                                              ? Icons.keyboard_arrow_down
-                                              : Icons.arrow_forward_ios,
+                                        AnimatedRotation(
+                                          curve: Curves.ease,
+                                          turns: open == 1 ? 0.25 : 0,
+                                          duration: Duration(milliseconds: 300),
+                                          child: Icon(Icons.arrow_forward_ios),
                                         ),
                                       ],
                                     ),
                                   ],
                                 ),
                               ),
-                              if (open == 1)
-                                Column(
-                                  children: [
-                                    RadioGroup(
-                                      groupValue: gender,
-                                      onChanged: (a) {
-                                        gender = 0;
-                                        setState(() {});
-                                      },
-                                      child: RadioListTile(
-                                        value: 0,
-                                        title: Text("女"),
+                              AnimatedContainer(
+                                duration: Duration(milliseconds: 300),
+                                curve: Curves.ease,
+                                height: open == 1 ? 120 : 0,
+                                child: SingleChildScrollView(
+                                  child: Column(
+                                    children: [
+                                      RadioGroup<int>(
+                                        groupValue: gender,
+                                        onChanged: (value) {
+                                          setState(() {
+                                            gender = value!;
+                                          });
+                                        },
+                                        child: Column(
+                                          children: [
+                                            RadioListTile<int>(
+                                              value: 0,
+                                              title: Text("女"),
+                                            ),
+                                            RadioListTile<int>(
+                                              value: 1,
+                                              title: Text("男"),
+                                            ),
+                                          ],
+                                        ),
                                       ),
-                                    ),
-                                    RadioGroup(
-                                      groupValue: gender,
-                                      onChanged: (a) {
-                                        gender = 1;
-                                        setState(() {});
-                                      },
-                                      child: RadioListTile(
-                                        value: 1,
-                                        title: Text("男"),
-                                      ),
-                                    ),
-                                  ],
+                                    ],
+                                  ),
                                 ),
+                              ),
                               Divider(indent: 10, endIndent: 10),
                               ListTile(
                                 onTap: () {
-                                  dayOpen = !dayOpen;
+                                  open = 2;
                                   setState(() {});
                                 },
                                 leading: Icon(
@@ -138,43 +169,43 @@ class _StartScreenState extends State<StartScreen> {
                                     Row(
                                       children: [
                                         Text(year.toString()),
-                                        Icon(
-                                          dayOpen
-                                              ? Icons.keyboard_arrow_down
-                                              : Icons.arrow_forward_ios,
+                                        AnimatedRotation(
+                                          turns: open == 2 ? 0.25 : 0,
+                                          curve: Curves.ease,
+                                          duration: Duration(milliseconds: 300),
+                                          child: Icon(Icons.arrow_forward_ios),
                                         ),
                                       ],
                                     ),
                                   ],
                                 ),
                               ),
-                              if (dayOpen)
-                                SizedBox(
-                                  height: 100,
-                                  child: ListWheelScrollView.useDelegate(
-                                    diameterRatio: 1.5,
-                                    physics: FixedExtentScrollPhysics(),
-                                    onSelectedItemChanged: (a) {
-                                      year = a + 1901;
-                                      setState(() {});
-                                    },
-                                    itemExtent: 30,
-                                    controller: yearController,
-                                    childDelegate:
-                                        ListWheelChildBuilderDelegate(
-                                          childCount:
-                                              DateTime.now().year - 1900,
-                                          builder: (context, index) => Text(
-                                            (1901 + index).toString(),
-                                            style: TextStyle(fontSize: 20),
-                                          ),
-                                        ),
+                              AnimatedContainer(
+                                height: open == 2 ? 100 : 0,
+                                curve: Curves.ease,
+                                duration: Duration(milliseconds: 300),
+                                child: ListWheelScrollView.useDelegate(
+                                  diameterRatio: 1.5,
+                                  physics: FixedExtentScrollPhysics(),
+                                  onSelectedItemChanged: (a) {
+                                    year = a + 1901;
+                                    setState(() {});
+                                  },
+                                  itemExtent: 30,
+                                  controller: yearController,
+                                  childDelegate: ListWheelChildBuilderDelegate(
+                                    childCount: DateTime.now().year - 1900,
+                                    builder: (context, index) => Text(
+                                      (1901 + index).toString(),
+                                      style: TextStyle(fontSize: 20),
+                                    ),
                                   ),
                                 ),
+                              ),
                               Divider(indent: 10, endIndent: 10),
                               ListTile(
                                 onTap: () {
-                                  weightOpen = !weightOpen;
+                                  open = 3;
                                   setState(() {});
                                 },
                                 leading: Icon(
@@ -189,42 +220,43 @@ class _StartScreenState extends State<StartScreen> {
                                     Row(
                                       children: [
                                         Text("${weight}KG"),
-                                        Icon(
-                                          weightOpen
-                                              ? Icons.keyboard_arrow_down
-                                              : Icons.arrow_forward_ios,
+                                        AnimatedRotation(
+                                          curve: Curves.ease,
+                                          turns: open == 3 ? 0.25 : 0,
+                                          duration: Duration(milliseconds: 300),
+                                          child: Icon(Icons.arrow_forward_ios),
                                         ),
                                       ],
                                     ),
                                   ],
                                 ),
                               ),
-                              if (weightOpen)
-                                SizedBox(
-                                  height: 100,
-                                  child: ListWheelScrollView.useDelegate(
-                                    physics: FixedExtentScrollPhysics(),
-                                    onSelectedItemChanged: (a) {
-                                      weight = a;
-                                      setState(() {});
-                                    },
-                                    itemExtent: 30,
-                                    controller: weightController,
-                                    diameterRatio: 1.5,
-                                    childDelegate:
-                                        ListWheelChildBuilderDelegate(
-                                          childCount: 200,
-                                          builder: (context, index) => Text(
-                                            index.toString(),
-                                            style: TextStyle(fontSize: 20),
-                                          ),
-                                        ),
+                              AnimatedContainer(
+                                duration: Duration(milliseconds: 300),
+                                height: open == 3 ? 100 : 0,
+                                curve: Curves.ease,
+                                child: ListWheelScrollView.useDelegate(
+                                  physics: FixedExtentScrollPhysics(),
+                                  onSelectedItemChanged: (a) {
+                                    weight = a;
+                                    setState(() {});
+                                  },
+                                  itemExtent: 30,
+                                  controller: weightController,
+                                  diameterRatio: 1.5,
+                                  childDelegate: ListWheelChildBuilderDelegate(
+                                    childCount: 200,
+                                    builder: (context, index) => Text(
+                                      index.toString(),
+                                      style: TextStyle(fontSize: 20),
+                                    ),
                                   ),
                                 ),
+                              ),
                               Divider(indent: 10, endIndent: 10),
                               ListTile(
                                 onTap: () {
-                                  heightOpen = !heightOpen;
+                                  open = 4;
                                   setState(() {});
                                 },
                                 leading: Icon(Icons.height, color: Colors.blue),
@@ -236,10 +268,11 @@ class _StartScreenState extends State<StartScreen> {
                                     Row(
                                       children: [
                                         Text("${height}CM"),
-                                        Icon(
-                                          heightOpen
-                                              ? Icons.keyboard_arrow_down
-                                              : Icons.arrow_forward_ios,
+                                        AnimatedRotation(
+                                          curve: Curves.ease,
+                                          turns: open == 4 ? 0.25 : 0,
+                                          duration: Duration(milliseconds: 300),
+                                          child: Icon(Icons.arrow_forward_ios),
                                         ),
                                       ],
                                     ),
@@ -247,8 +280,8 @@ class _StartScreenState extends State<StartScreen> {
                                 ),
                               ),
                               AnimatedContainer(
-                                duration: Duration(milliseconds: 200),
-                                height: heightOpen ? 100 : 0,
+                                duration: Duration(milliseconds: 300),
+                                height: open == 4 ? 100 : 0,
                                 curve: Curves.ease,
                                 child: ListWheelScrollView.useDelegate(
                                   physics: FixedExtentScrollPhysics(),
@@ -274,15 +307,32 @@ class _StartScreenState extends State<StartScreen> {
                       ),
                     ),
                   ),
-                  FilledButton(
-                    onPressed: () {
-                      pageController.animateToPage(
-                        1,
-                        duration: Duration(milliseconds: 250),
-                        curve: Curves.ease,
-                      );
-                    },
-                    child: Text("下一步"),
+                  Padding(
+                    padding: const EdgeInsets.all(10.0),
+                    child: SizedBox(
+                      width: 10000,
+                      child: FilledButton(
+                        onPressed: () {
+                          pageController.animateToPage(
+                            1,
+                            duration: Duration(milliseconds: 250),
+                            curve: Curves.ease,
+                          );
+                        },
+                        style: FilledButton.styleFrom(
+                          backgroundColor: ColorScheme.of(
+                            context,
+                          ).surfaceContainerLow,
+                        ),
+                        child: Text(
+                          "下一步",
+                          style: TextStyle(
+                            color: Colors.blue,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -296,16 +346,142 @@ class _StartScreenState extends State<StartScreen> {
                   padding: const EdgeInsets.all(8.0),
                   child: SizedBox(
                     width: 10000,
-                    height: 100,
-                    child: Card(
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text("5500步數", style: TextStyle(fontSize: 25)),
-                            Text("建議", style: TextStyle(color: Colors.green)),
-                          ],
+                    child: GestureDetector(
+                      onTap: () {
+                        targetC = false;
+                        setState(() {});
+                      },
+                      child: Card(
+                        shape: RoundedRectangleBorder(
+                          side: BorderSide(
+                            color: !targetC ? Colors.blue : Colors.transparent,
+                            width: 2,
+                          ),
+                          borderRadius: BorderRadius.circular(12.0),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(20.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text("5500步數", style: TextStyle(fontSize: 25)),
+                              Text(
+                                "建議",
+                                style: TextStyle(
+                                  color: Colors.green,
+                                  fontSize: 20,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: GestureDetector(
+                    onTap: () {
+                      targetC = true;
+                      setState(() {});
+                    },
+                    child: SizedBox(
+                      width: 10000,
+                      child: Card(
+                        shape: RoundedRectangleBorder(
+                          side: BorderSide(
+                            color: targetC ? Colors.blue : Colors.transparent,
+                            width: 2,
+                          ),
+                          borderRadius: BorderRadius.circular(12.0),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(20.0),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text("客制目標", style: TextStyle(fontSize: 25)),
+                                  AnimatedRotation(
+                                    turns: targetC ? 0.25 : 0,
+                                    curve: Curves.ease,
+                                    duration: Duration(milliseconds: 300),
+                                    child: Icon(Icons.arrow_forward_ios),
+                                  ),
+                                ],
+                              ),
+                              AnimatedContainer(
+                                duration: Duration(milliseconds: 300),
+                                height: targetC ? 50 : 5,
+                                curve: Curves.ease,
+                                child: SingleChildScrollView(
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      IconButton(
+                                        icon: Icon(Icons.remove),
+                                        onPressed: () {
+                                          if (target > 100) target -= 100;
+                                          setState(() {});
+                                        },
+                                      ),
+                                      Text(
+                                        target.toString(),
+                                        style: TextStyle(fontSize: 30),
+                                      ),
+                                      IconButton(
+                                        icon: Icon(Icons.add),
+                                        onPressed: () {
+                                          target += 100;
+                                          setState(() {});
+                                        },
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(height: 147),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: SizedBox(
+                    width: 10000,
+                    child: FilledButton(
+                      onPressed: () {
+                        var date = {
+                          "gender": gender == 0 ? "女" : "男",
+                          "year": year.toString(),
+                          "weight": weight.toString(),
+                          "height": height.toString(),
+                          "target": targetC ? target.toString() : "5500",
+                        };
+                        File("data/data/com.example.move_go_v4/files/setting")
+                          ..create()
+                          ..writeAsString(jsonEncode(date));
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => StepScreen()),
+                        );
+                      },
+                      style: FilledButton.styleFrom(
+                        backgroundColor: Colors.blue,
+                      ),
+                      child: Text(
+                        "繼續",
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
                     ),
