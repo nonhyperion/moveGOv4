@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:move_go_v4/StepScreen.dart';
 
 void main() {
@@ -45,9 +46,7 @@ class _StartScreenState extends State<StartScreen> {
   @override
   void initState() {
     pageController = PageController(initialPage: 0);
-    yearController = FixedExtentScrollController(
-      initialItem: DateTime.now().year - 1901,
-    );
+    yearController = FixedExtentScrollController(initialItem: DateTime.now().year - 1901);
     weightController = FixedExtentScrollController(initialItem: 55);
     heightController = FixedExtentScrollController(initialItem: 170);
     to();
@@ -55,7 +54,12 @@ class _StartScreenState extends State<StartScreen> {
   }
 
   Future<void> to() async {
-    if (await File("data/data/com.example.move_go_v4/files/setting").exists()) {
+    if (!await File("/data/data/com.example.move_go_v4/files/data").exists()) {
+      File(
+        "/data/data/com.example.move_go_v4/files/data",
+      ).writeAsString(await rootBundle.loadString("assets/data.json"));
+    }
+    if (await File("/data/data/com.example.move_go_v4/files/setting").exists()) {
       Navigator.of(context)
         ..pop()
         ..push(MaterialPageRoute(builder: (context) => StepScreen()));
@@ -97,13 +101,9 @@ class _StartScreenState extends State<StartScreen> {
                                   open = 1;
                                   setState(() {});
                                 },
-                                leading: Icon(
-                                  Icons.directions_walk,
-                                  color: Colors.blue,
-                                ),
+                                leading: Icon(Icons.directions_walk, color: Colors.blue),
                                 title: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: [
                                     Text("性別"),
                                     Row(
@@ -136,14 +136,8 @@ class _StartScreenState extends State<StartScreen> {
                                         },
                                         child: Column(
                                           children: [
-                                            RadioListTile<int>(
-                                              value: 0,
-                                              title: Text("女"),
-                                            ),
-                                            RadioListTile<int>(
-                                              value: 1,
-                                              title: Text("男"),
-                                            ),
+                                            RadioListTile<int>(value: 0, title: Text("女")),
+                                            RadioListTile<int>(value: 1, title: Text("男")),
                                           ],
                                         ),
                                       ),
@@ -157,13 +151,9 @@ class _StartScreenState extends State<StartScreen> {
                                   open = 2;
                                   setState(() {});
                                 },
-                                leading: Icon(
-                                  Icons.cake_outlined,
-                                  color: Colors.blue,
-                                ),
+                                leading: Icon(Icons.cake_outlined, color: Colors.blue),
                                 title: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: [
                                     Text("出生年次"),
                                     Row(
@@ -185,6 +175,8 @@ class _StartScreenState extends State<StartScreen> {
                                 curve: Curves.ease,
                                 duration: Duration(milliseconds: 300),
                                 child: ListWheelScrollView.useDelegate(
+                                  useMagnifier: true,
+                                  magnification: 1.3,
                                   diameterRatio: 1.5,
                                   physics: FixedExtentScrollPhysics(),
                                   onSelectedItemChanged: (a) {
@@ -208,13 +200,9 @@ class _StartScreenState extends State<StartScreen> {
                                   open = 3;
                                   setState(() {});
                                 },
-                                leading: Icon(
-                                  Icons.monitor_weight_outlined,
-                                  color: Colors.blue,
-                                ),
+                                leading: Icon(Icons.monitor_weight_outlined, color: Colors.blue),
                                 title: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: [
                                     Text("重量"),
                                     Row(
@@ -236,6 +224,8 @@ class _StartScreenState extends State<StartScreen> {
                                 height: open == 3 ? 100 : 0,
                                 curve: Curves.ease,
                                 child: ListWheelScrollView.useDelegate(
+                                  useMagnifier: true,
+                                  magnification: 1.3,
                                   physics: FixedExtentScrollPhysics(),
                                   onSelectedItemChanged: (a) {
                                     weight = a;
@@ -246,10 +236,8 @@ class _StartScreenState extends State<StartScreen> {
                                   diameterRatio: 1.5,
                                   childDelegate: ListWheelChildBuilderDelegate(
                                     childCount: 200,
-                                    builder: (context, index) => Text(
-                                      index.toString(),
-                                      style: TextStyle(fontSize: 20),
-                                    ),
+                                    builder: (context, index) =>
+                                        Text(index.toString(), style: TextStyle(fontSize: 20)),
                                   ),
                                 ),
                               ),
@@ -261,8 +249,7 @@ class _StartScreenState extends State<StartScreen> {
                                 },
                                 leading: Icon(Icons.height, color: Colors.blue),
                                 title: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: [
                                     Text("身高"),
                                     Row(
@@ -284,6 +271,8 @@ class _StartScreenState extends State<StartScreen> {
                                 height: open == 4 ? 100 : 0,
                                 curve: Curves.ease,
                                 child: ListWheelScrollView.useDelegate(
+                                  useMagnifier: true,
+                                  magnification: 1.3,
                                   physics: FixedExtentScrollPhysics(),
                                   onSelectedItemChanged: (a) {
                                     height = a;
@@ -294,10 +283,8 @@ class _StartScreenState extends State<StartScreen> {
                                   diameterRatio: 1.5,
                                   childDelegate: ListWheelChildBuilderDelegate(
                                     childCount: 250,
-                                    builder: (context, index) => Text(
-                                      index.toString(),
-                                      style: TextStyle(fontSize: 20),
-                                    ),
+                                    builder: (context, index) =>
+                                        Text(index.toString(), style: TextStyle(fontSize: 20)),
                                   ),
                                 ),
                               ),
@@ -320,16 +307,11 @@ class _StartScreenState extends State<StartScreen> {
                           );
                         },
                         style: FilledButton.styleFrom(
-                          backgroundColor: ColorScheme.of(
-                            context,
-                          ).surfaceContainerLow,
+                          backgroundColor: ColorScheme.of(context).surfaceContainerLow,
                         ),
                         child: Text(
                           "下一步",
-                          style: TextStyle(
-                            color: Colors.blue,
-                            fontWeight: FontWeight.bold,
-                          ),
+                          style: TextStyle(color: Colors.blue, fontWeight: FontWeight.bold),
                         ),
                       ),
                     ),
@@ -365,13 +347,7 @@ class _StartScreenState extends State<StartScreen> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text("5500步數", style: TextStyle(fontSize: 25)),
-                              Text(
-                                "建議",
-                                style: TextStyle(
-                                  color: Colors.green,
-                                  fontSize: 20,
-                                ),
-                              ),
+                              Text("建議", style: TextStyle(color: Colors.green, fontSize: 20)),
                             ],
                           ),
                         ),
@@ -402,8 +378,7 @@ class _StartScreenState extends State<StartScreen> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text("客制目標", style: TextStyle(fontSize: 25)),
                                   AnimatedRotation(
@@ -420,8 +395,7 @@ class _StartScreenState extends State<StartScreen> {
                                 curve: Curves.ease,
                                 child: SingleChildScrollView(
                                   child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                     children: [
                                       IconButton(
                                         icon: Icon(Icons.remove),
@@ -430,10 +404,7 @@ class _StartScreenState extends State<StartScreen> {
                                           setState(() {});
                                         },
                                       ),
-                                      Text(
-                                        target.toString(),
-                                        style: TextStyle(fontSize: 30),
-                                      ),
+                                      Text(target.toString(), style: TextStyle(fontSize: 30)),
                                       IconButton(
                                         icon: Icon(Icons.add),
                                         onPressed: () {
@@ -460,13 +431,13 @@ class _StartScreenState extends State<StartScreen> {
                     child: FilledButton(
                       onPressed: () {
                         var date = {
-                          "gender": gender == 0 ? "女" : "男",
+                          "gender": gender.toString(),
                           "year": year.toString(),
                           "weight": weight.toString(),
                           "height": height.toString(),
                           "target": targetC ? target.toString() : "5500",
                         };
-                        File("data/data/com.example.move_go_v4/files/setting")
+                        File("/data/data/com.example.move_go_v4/files/setting")
                           ..create()
                           ..writeAsString(jsonEncode(date));
                         Navigator.push(
@@ -474,15 +445,10 @@ class _StartScreenState extends State<StartScreen> {
                           MaterialPageRoute(builder: (context) => StepScreen()),
                         );
                       },
-                      style: FilledButton.styleFrom(
-                        backgroundColor: Colors.blue,
-                      ),
+                      style: FilledButton.styleFrom(backgroundColor: Colors.blue),
                       child: Text(
                         "繼續",
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
                       ),
                     ),
                   ),
